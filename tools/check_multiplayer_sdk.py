@@ -120,7 +120,7 @@ def main(args):
         raise AssertionError('Multiplayer proof must live outside the host checkout')
     work.mkdir(parents=True, exist_ok=False)
     archive, sums = args.archive.resolve(), args.sums.resolve()
-    sdk, public = verify_extract(archive, sums, work / 'sdk')
+    sdk, _ = verify_extract(archive, sums, work / 'sdk')
     feature = ROOT / 'plugins/multiplayer'
     source = work / 'source'
     copy_source(source)
