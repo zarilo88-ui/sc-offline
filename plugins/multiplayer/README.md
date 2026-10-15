@@ -262,9 +262,14 @@ that needs a connection needs a shell that grants admission. Report what `mod.lo
 
 The pinned published **sdk-v2.2.0 contains G13, G3 and retained widgets**
 (`sc_private_session.h`, `sc_game_spatial.h`, `sco_widgets.h`); sdk-v2.0.0 did
-not. The CI release job does not yet stage multiplayer. The external target
+not. CI builds and tests this module on every pull request against the
+checksum-verified published `sco-sdk-2.2.0.zip` (`tools/check_multiplayer_sdk.py`, one
+leg of the `external-sdk` job, on Windows): the build with warnings as errors, the
+workflow test, the buffer part of the motion test, the install inventory, the SDK's own
+`sco-plugin-check` on the installed module, and negative controls that must fail. The
+release job still does not stage multiplayer into the player zip. The external target
 refuses a missing header and never adds a host include root. An isolated local
-compile uses the checksum-verified published `sco-sdk-2.2.0.zip`:
+compile uses the same archive:
 
 ```
 cmake -S plugins/multiplayer -B build-multiplayer -G Ninja \
@@ -275,9 +280,11 @@ ctest --test-dir build-multiplayer -R '^multiplayer-module-workflow$' -V
 cmake --install build-multiplayer --component multiplayer --prefix stage
 ```
 
-`-DSCO_WORKFLOW_TESTS=ON` also builds `multiplayer-motion-test` (ctest name `multiplayer-motion`, about 25 s in
-real time). Add `-DSCO_MOTION_BASELINE_DIR=<folder with the unmodified multiplayer.cpp and multiplayer_wire.h of
-sc-offline #126, commit 481b99e>` and it runs that module beside this one on the same path and compares them.
+`-DSCO_WORKFLOW_TESTS=ON` also builds `multiplayer-motion-test`. Its buffer part alone is the ctest
+`multiplayer-motion-buffer` (a few milliseconds, no module): that and the workflow test are what CI runs. The
+whole test is `multiplayer-motion` (about 25 s in real time). Add `-DSCO_MOTION_BASELINE_DIR=<folder with the
+unmodified multiplayer.cpp and multiplayer_wire.h of sc-offline v0.7.8, commit 4db58d2>` and it runs that module
+beside this one on the same path and compares them; that comparison is a local proof, not part of CI.
 
 The enabled `plugin.ini` and module install into `stage/data/plugins/multiplayer`
 without a `disabled` marker. Windows emits `multiplayer.dll`; macOS produces a

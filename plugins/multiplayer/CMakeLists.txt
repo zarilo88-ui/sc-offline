@@ -47,7 +47,7 @@ if(SCO_WORKFLOW_TESTS)
   set_tests_properties(multiplayer-module-workflow PROPERTIES TIMEOUT 30)
 
   # The motion test loads this module and, when SCO_MOTION_BASELINE_DIR holds the unmodified sc-offline #126
-  # multiplayer.cpp and multiplayer_wire.h (git show 481b99e:plugins/multiplayer/...), that one too, builds the
+  # multiplayer.cpp and multiplayer_wire.h (git show 4db58d2:plugins/multiplayer/..., v0.7.8), that one too, builds the
   # same synthetic path for both and compares their ghosts. The unmodified module is built without warnings
   # shown: it is not this change's code.
   set(SCO_MOTION_BASELINE_DIR "" CACHE PATH "Folder with the unmodified multiplayer.cpp and multiplayer_wire.h the motion test compares against")
@@ -77,4 +77,10 @@ if(SCO_WORKFLOW_TESTS)
   endif()
   add_test(NAME multiplayer-motion COMMAND multiplayer-motion-test ${SCO_MOTION_MODULES})
   set_tests_properties(multiplayer-motion PROPERTIES TIMEOUT 120)
+
+  # The buffer part of the motion test alone: no module, no sockets, no real time (a few milliseconds). With the
+  # workflow test it is what sc-offline's CI runs against the published SDK (tools/check_multiplayer_sdk.py); the
+  # module comparison above takes about 25 s and needs the unmodified module, so it stays a local proof.
+  add_test(NAME multiplayer-motion-buffer COMMAND multiplayer-motion-test --track-tests)
+  set_tests_properties(multiplayer-motion-buffer PROPERTIES TIMEOUT 30)
 endif()

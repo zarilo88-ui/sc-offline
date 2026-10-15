@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Focused 1D/2A/2B host withdrawal and published-artifact composition checks."""
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,6 +43,22 @@ class ExternalRelease(unittest.TestCase):
         self.assertIn('built-external', workflow)
         self.assertNotIn('build/data/plugins/creative/creative.dll', workflow)
         self.assertNotIn('built-creative', workflow)
+
+    def test_multiplayer_is_proved_against_the_published_sdk_but_not_shipped(self):
+        workflow = (ROOT / '.github/workflows/build.yml').read_text()
+        matrix = re.search(r'feature: \[([^\]]*)\]', workflow)
+        self.assertIsNotNone(matrix)
+        self.assertIn('multiplayer', [name.strip() for name in matrix.group(1).split(',')])
+        self.assertIn('needs: [build, inspector-sdk, npc-sdk, external-sdk]', workflow)
+        # The release job copies the features it names; multiplayer is not one of them and has no shipped folder.
+        self.assertIn('for feature in creative discord crew spawn mining; do', workflow)
+        self.assertFalse((ROOT / 'data/plugins/multiplayer').exists())
+        proof = (ROOT / 'tools/check_multiplayer_sdk.py').read_text()
+        cmake = (ROOT / 'plugins/multiplayer/CMakeLists.txt').read_text()
+        self.assertIn('add_test(NAME multiplayer-motion-buffer COMMAND multiplayer-motion-test --track-tests)', cmake)
+        for test in ('multiplayer-module-workflow', 'multiplayer-motion-buffer'):
+            self.assertIn(f"add_test(NAME {test}", cmake)
+            self.assertIn(test, proof)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

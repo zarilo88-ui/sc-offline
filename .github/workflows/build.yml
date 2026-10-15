@@ -162,14 +162,17 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-  # Proofs: check_creative_sdk.py, check_discord_sdk.py, check_crew_sdk.py, check_spawn_sdk.py.
+  # Proofs: check_creative_sdk.py, check_discord_sdk.py, check_crew_sdk.py, check_spawn_sdk.py,
+  # check_mining_sdk.py, check_multiplayer_sdk.py.
   # Isolated native features; checker and compiler traces use published archives only.
   external-sdk:
     strategy:
       fail-fast: false
       matrix:
         # mining requires the newly published game SDK; the old pin must refuse, not fall back.
-        feature: [creative, discord, crew, spawn, mining]
+        # multiplayer is built, tested and staged by this leg only: the release job copies the five features it
+        # names, so the player zip does not carry it.
+        feature: [creative, discord, crew, spawn, mining, multiplayer]
     runs-on: windows-2025-vs2026
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
