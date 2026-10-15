@@ -134,7 +134,7 @@ def main(args):
     tested = run(['ctest', '--test-dir', build, '-C', 'Release', '--no-tests=error', '-R',
                   '^(' + '|'.join(CI_TESTS) + ')$', '--output-on-failure', '-V'], work).stdout
     print(tested)
-    if ('100% tests passed, 0 tests failed out of %d' % len(CI_TESTS)) not in tested:
+    if f'100% tests passed, 0 tests failed out of {len(CI_TESTS)}' not in tested:
         raise AssertionError('Expected exactly the two deterministic tests to pass')
     for token in ('multiplayer module: ', ' passed, 0 failed (synthetic public services; no sockets/game)',
                   'multiplayer motion (buffer only): '):
